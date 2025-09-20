@@ -1,0 +1,147 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Герой-секция -->
+<section class="hero-section" id="home">
+  <div class="container">
+    <div class="hero-content">
+      <!-- Используем hero_title из HomePageContent, он может содержать HTML -->
+      <h1>{{ home_content.hero_title|safe }}</h1>
+      <p>{{ home_content.hero_subtitle }}</p>
+      <a href="#menu" class="hero-btn">{{ home_content.hero_button_text }}</a>
+    </div>
+  </div>
+</section>
+
+<!-- Секция меню -->
+<section class="menu-section" id="menu">
+  <div class="container">
+    <h2 class="section-title">Наше меню</h2>
+    
+    <!-- Вкладки категорий -->
+    <div class="menu-tabs">
+      <button class="menu-tab active" data-category="all">Все</button>
+      {% for category in categories %}
+        <button class="menu-tab" data-category="{{ category.slug }}">{{ category.name }}</button>
+      {% endfor %}
+    </div>
+    
+    <!-- Сетка товаров -->
+    <div class="menu-grid" id="menu-grid">
+      {% for product in products %}
+        <div class="menu-item" data-category="{{ product.category.slug }}">
+          {% if product.image %}
+            <!-- Используем url для медиафайлов -->
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+          {% else %}
+            <div style="background-color: #f0f0f0; height: 200px; display: flex; align-items: center; justify-content: center;">
+              Нет изображения
+            </div>
+          {% endif %}
+          <div class="menu-item-content">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description|truncatewords:15 }}</p>
+            <div class="menu-item-price">{{ product.price }} ₽</div>
+            <button class="add-to-cart-btn" onclick="addToCart({{ product.id }}, '{{ product.name|escapejs }}', {{ product.price }})">
+              В корзину
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Секция "О нас" -->
+<section class="about-section" id="about">
+  <div class="container">
+    <h2 class="section-title">{{ home_content.about_title }}</h2>
+    <div class="about-content">
+      <div class="about-text">
+        <p>{{ home_content.about_text }}</p>
+      </div>
+      <!-- Используем изображение из HomePageContent -->
+      {% if home_content.about_image %}
+        <div class="about-image">
+          <img src="{{ home_content.about_image.url }}" alt="{{ home_content.about_title }}">
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Секция доставки -->
+<section class="delivery-section" id="delivery">
+  <div class="container">
+    <h2 class="section-title">{{ home_content.delivery_title }}</h2>
+    <div class="delivery-content">
+      <!-- Используем изображение из HomePageContent -->
+      {% if home_content.delivery_image %}
+        <div class="delivery-image">
+          <img src="{{ home_content.delivery_image.url }}" alt="{{ home_content.delivery_title }}">
+        </div>
+      {% endif %}
+      <div class="delivery-text">
+        <p>{{ home_content.delivery_text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Секция контактов -->
+<section class="contacts-section" id="contacts">
+  <div class="container">
+    <h2 class="section-title">Контакты</h2>
+    <div class="contacts-grid">
+      <div class="contact-card">
+        <div class="contact-icon">&#128222;</div>
+        <h3>Телефон</h3>
+        <p>{{ site_settings.phone }}</p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">&#9993;</div>
+        <h3>Email</h3>
+        <p><a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a></p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">&#128205;</div>
+        <h3>Адрес</h3>
+        <p>{{ site_settings.address }}</p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">&#8986;</div>
+        <h3>Режим работы</h3>
+        <p>{{ site_settings.working_hours }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Фильтрация меню по категориям
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuTabs = document.querySelectorAll('.menu-tab');
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    menuTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Убираем активный класс у всех вкладок
+        menuTabs.forEach(t => t.classList.remove('active'));
+        // Добавляем активный класс текущей вкладке
+        tab.classList.add('active');
+        
+        const category = tab.dataset.category;
+        
+        menuItems.forEach(item => {
+          if (category === 'all' || item.dataset.category === category) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

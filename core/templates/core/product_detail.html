@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Pro🥑ПИТАНИЕ{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid product-detail-image" alt="{{ product.name }}">
+            {% else %}
+                <div class="no-image-placeholder">Нет изображения</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h1>{{ product.name }}</h1>
+            <p class="lead">{{ product.description }}</p>
+            <h3>{{ product.price }} ₽</h3>
+            
+            <!-- Кнопка добавления в корзину -->
+            <div class="add-to-cart-container">
+                <button class="btn btn-success btn-lg" onclick="addToCart({{ product.id }}, '{{ product.name|escapejs }}', {{ product.price }})">
+                    Добавить в корзину
+                </button>
+            </div>
+            
+            <a href="/" class="btn btn-secondary mt-3">Назад к товарам</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

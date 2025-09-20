@@ -1,0 +1,110 @@
+{% extends 'orders_admin/base.html' %}
+{% load math_extras %}
+{% block title %}Заказ #{{ order.order_number }} - Панель управления заказами{% endblock %}
+{% block page_title %}Заказ #{{ order.order_number }}{% endblock %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Информация о заказе</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Номер заказа:</strong> {{ order.order_number }}</p>
+                <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+                <p><strong>Статус:</strong> 
+                    <span class="badge bg-{% if order.status == 'new' %}warning{% elif order.status == 'paid' %}success{% elif order.status == 'shipped' %}info{% elif order.status == 'delivered' %}primary{% else %}secondary{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </p>
+                <p><strong>Сумма:</strong> {{ order.total_amount }} ₽</p>
+                <p><strong>ID платежа:</strong> {{ order.payment_id|default:"—" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Информация о клиенте</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Имя:</strong> {{ order.customer_name }}</p>
+                <p><strong>Email:</strong> {{ order.customer_email }}</p>
+                <p><strong>Телефон:</strong> {{ order.customer_phone }}</p>
+                <p><strong>Адрес доставки:</strong> {{ order.delivery_address }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Состав заказа</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th>Количество</th>
+                                <th>Цена за единицу</th>
+                                <th>Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.price }} ₽</td>
+                                <td>{{ item.price|mul:item.quantity }} ₽</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Итого:</th>
+                                <th>{{ order.total_amount }} ₽</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Изменить статус</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'orders_admin:change_order_status' order.id %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select name="status" class="form-select">
+                                {% for value, display in order.STATUS_CHOICES %}
+                                    <option value="{{ value }}" {% if value == order.status %}selected{% endif %}>
+                                        {{ display }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary">Изменить статус</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Pro🥑ПИТАНИЕ{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Боковое меню категорий -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="sidebar-menu">
+                <h3 class="sidebar-title">Категории меню</h3>
+                <ul class="category-list">
+                    {% for cat in categories %}
+                        <li class="category-item {% if cat.slug == category.slug %}active{% endif %}">
+                            <a href="{% url 'core:category_detail' cat.slug %}" class="category-link">
+                                <span class="category-icon">
+                                    {% if cat.name == "Кофе" %}
+                                        ☕
+                                    {% elif cat.name == "BOOMBAR" %}
+                                        🍫
+                                    {% elif cat.name == "Кухня" %}
+                                        🍽️
+                                    {% elif cat.name == "Напитки" %}
+                                        🥤
+                                    {% elif cat.name == "Десерты" %}
+                                        🍰
+                                    {% elif cat.name == "Салаты" %}
+                                        🥗
+                                    {% elif cat.name == "Супы" %}
+                                        🍲
+                                    {% elif cat.name == "Горячее" %}
+                                        🍛
+                                    {% else %}
+                                        🌿
+                                    {% endif %}
+                                </span>
+                                <span class="category-name">{{ cat.name }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Заголовок категории -->
+            <div class="category-header mb-4">
+                <h1 class="category-main-title">{{ category.name }}</h1>
+                {% if category.description %}
+                    <p class="category-description">{{ category.description }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Список товаров -->
+            <div class="row">
+                {% if products %}
+                    {% for product in products %}
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                        <div class="product-card-category h-100">
+                            <a href="{{ product.get_absolute_url }}" class="product-link-category">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="product-image-category" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="no-image-placeholder-category">
+                                        <span>Нет изображения</span>
+                                    </div>
+                                {% endif %}
+                                <div class="product-info-category">
+                                    <h4 class="product-title-category">{{ product.name }}</h4>
+                                    {% if product.description %}
+                                        <p class="product-description-category">{{ product.description|truncatewords:15 }}</p>
+                                    {% endif %}
+                                    <div class="product-price-category">{{ product.price }} ₽</div>
+                                </div>
+                            </a>
+                            <button class="btn btn-add-to-cart-category" onclick="addToCart({{ product.id }}, '{{ product.name|escapejs }}', {{ product.price }})">
+                                В корзину
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="no-products-message">
+                            <p>В этой категории пока нет товаров.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

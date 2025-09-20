@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Оформление заказа</h2>
+    
+    <div class="mb-4">
+        <h4>Ваш заказ:</h4>
+        <div id="order-summary">
+            <!-- Состав заказа будет заполнен JavaScript'ом -->
+            <p>Загрузка...</p>
+        </div>
+        <h5>Итого к оплате: <span id="total-amount-display">0.00</span> ₽</h5>
+    </div>
+
+    <form method="post" action="{% url 'core:create_order' %}">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="name" class="form-label">Имя:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="phone" class="form-label">Телефон:</label>
+            <input type="text" class="form-control" id="phone" name="phone" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="address" class="form-label">Адрес доставки:</label>
+            <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+        </div>
+        
+        <!-- Скрытое поле для передачи данных корзины -->
+        <input type="hidden" id="cart-input" name="cart">
+        <input type="hidden" id="total-amount-input" name="total_amount">
+        
+        <button type="submit" class="btn btn-success">Перейти к оплате</button>
+        <a href="/" class="btn btn-secondary">Вернуться в корзину</a>
+    </form>
+</div>
+
+<script>
+// Получаем данные корзины из localStorage и заполняем форму
+document.addEventListener('DOMContentLoaded', function() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let total = 0;
+    let summaryHtml = '<ul class="list-group">';
+
+    if (cart.length === 0) {
+        summaryHtml += '<li class="list-group-item">Корзина пуста</li>';
+    } else {
+        cart.forEach(item => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+            summaryHtml += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${item.name} (x${item.qty})
+                    <span>${itemTotal.toFixed(2)} ₽</span>
+                </li>
+            `;
+        });
+    }
+    summaryHtml += '</ul>';
+
+    document.getElementById('order-summary').innerHTML = summaryHtml;
+    document.getElementById('cart-input').value = JSON.stringify(cart);
+    document.getElementById('total-amount-input').value = total.toFixed(2);
+    document.getElementById('total-amount-display').textContent = total.toFixed(2);
+});
+</script>
+{% endblock %}
