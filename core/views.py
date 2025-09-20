@@ -7,11 +7,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib import messages
 from .models import Product, Category
 from orders.models import Order, OrderItem
 from editor.models import SiteSettings, HomePageContent
 
 def index(request):
+    """Главная страница сайта"""
     # Получаем настройки сайта
     site_settings = SiteSettings.get_settings()
     home_content = HomePageContent.get_content()
@@ -50,6 +52,7 @@ def category_detail(request, category_slug):
 
 
 def product_detail(request, product_id):
+    """Страница детальной информации о товаре"""
     product = get_object_or_404(Product, id=product_id)
     # Получаем настройки сайта
     site_settings = SiteSettings.get_settings()
@@ -57,7 +60,7 @@ def product_detail(request, product_id):
         'product': product,
         'site_settings': site_settings,
     }
-    return render(request, 'core/product_detail.html', {'product': product, 'site_settings': site_settings})
+    return render(request, 'core/product_detail.html', context)
 
 
 def create_order(request):
@@ -73,14 +76,14 @@ def create_order(request):
             # Получаем данные корзины из скрытого поля (в формате JSON)
             cart_data_json = request.POST.get('cart')
             if not cart_data_json:
-                # Можно вернуть ошибку
-                pass
+                messages.error(request, 'Корзина пуста. Добавьте товары перед оформлением заказа.')
+                return redirect('core:index')
             
             cart_data = json.loads(cart_data_json)
             
             if not cart_data:
-                # Можно вернуть ошибку
-                pass
+                messages.error(request, 'Корзина пуста. Добавьте товары перед оформлением заказа.')
+                return redirect('core:index')
 
             # Рассчитываем общую сумму
             total_amount = 0
@@ -103,8 +106,8 @@ def create_order(request):
                     continue
             
             if total_amount <= 0:
-                # Можно вернуть ошибку
-                pass
+                messages.error(request, 'Сумма заказа должна быть больше 0.')
+                return redirect('core:index')
 
             # Создаем заказ в базе данных
             order_number = f"ORD-{uuid.uuid4().hex[:8].upper()}"
@@ -153,9 +156,10 @@ def create_order(request):
         except Exception as e:
             # В production лучше логировать ошибку
             print(f"Ошибка при создании заказа: {e}")
+            messages.error(request, 'Произошла ошибка при оформлении заказа. Попробуйте ещё раз.')
             # Можно показать сообщение об ошибке пользователю
             # Для простоты просто редиректим обратно на форму
-            pass
+            return redirect('core:index')
 
     # Если GET запрос или ошибка, показываем форму
     # Нужно передать данные корзины в шаблон, чтобы показать их пользователю
@@ -163,6 +167,8 @@ def create_order(request):
     # Получаем настройки сайта для футера
     site_settings = SiteSettings.get_settings()
     return render(request, 'core/checkout.html', {'site_settings': site_settings})
+
+
 # Добавляем вебхук для ЮKassa
 @csrf_exempt
 @require_POST

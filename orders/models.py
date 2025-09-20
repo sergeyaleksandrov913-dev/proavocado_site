@@ -46,3 +46,37 @@ class OrderItem(models.Model):
     def get_cost(self):
         """Рассчитать стоимость позиции"""
         return self.price * self.quantity
+class Notification(models.Model):
+    """Уведомления для администратора"""
+    TYPE_CHOICES = [
+        ('order', 'Новый заказ'),
+        ('payment', 'Оплата'),
+        ('message', 'Сообщение'),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name="Заголовок")
+    message = models.TextField(verbose_name="Сообщение")
+    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='order', verbose_name="Тип уведомления")
+    is_read = models.BooleanField(default=False, verbose_name="Прочитано")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    related_object_id = models.PositiveIntegerField(blank=True, null=True, verbose_name="ID связанного объекта")
+
+    class Meta:
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_notification_type_display()})"
+
+    @classmethod
+    def create_order_notification(cls, order):
+        """Создать уведомление о новом заказе"""
+        title = f"Новый заказ #{order.order_number}"
+        message = f"Клиент: {order.customer_name}\nСумма: {order.total_amount} ₽\nСтатус: {order.get_status_display()}"
+        cls.objects.create(
+            title=title,
+            message=message,
+            notification_type='order',
+            related_object_id=order.id
+        )
