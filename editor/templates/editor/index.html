@@ -1,0 +1,35 @@
+{% extends 'editor/base.html' %}
+
+{% block title %}Редактор сайта{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Редактор сайта</h1>
+    <p>Добро пожаловать в панель управления контентом сайта Pro🥑ПИТАНИЕ.</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Настройки сайта</h5>
+                </div>
+                <div class="card-body">
+                    <p>Управление основными настройками сайта: логотип, фавикон, контакты, социальные сети.</p>
+                    <a href="/admin/editor/sitesettings/" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Контент главной страницы</h5>
+                </div>
+                <div class="card-body">
+                    <p>Редактирование текстов и изображений на главной странице: "О нас", "Доставка" и т.д.</p>
+                    <a href="/admin/editor/homepagecontent/" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
